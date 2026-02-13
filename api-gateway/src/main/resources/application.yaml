@@ -10,6 +10,10 @@ spring:
               uri: lb://NEWS-SERVICE
               predicates:
                 - Path=/api/v1/news/**,/api/v1/news
+            - id: user-service
+              uri: lb://USER-SERVICE
+              predicates:
+                - PATH=/api/v1/users/**,/api/v1/users
 
 server:
   port: 8080
