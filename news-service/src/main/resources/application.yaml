@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: news-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/news-service
+    username: root
+    password:
+    driver-class-name: com.mysql.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database: mysql
+server:
+  port: 8082
+FINN_URL: ${FINN_API_URL};
+

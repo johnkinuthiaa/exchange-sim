@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: news-service
+              uri: lb://NEWS-SERVICE
+              predicates:
+                - Path=/api/v1/news/**,/api/v1/news
+
+server:
+  port: 8080
+
