@@ -2,6 +2,7 @@ package com.slippery.accountservice.controller;
 
 import com.slippery.accountservice.dto.AccountCreationRequest;
 import com.slippery.accountservice.dto.AccountResponse;
+import com.slippery.accountservice.dto.BalanceUpdate;
 import com.slippery.accountservice.models.AccountType;
 import com.slippery.accountservice.service.AccountService;
 import jakarta.validation.constraints.NotBlank;
@@ -32,9 +33,12 @@ public class AccountController {
         AccountResponse resetAccount =service.resetDemoAccount(userId, accountId);
         return ResponseEntity.status(HttpStatusCode.valueOf(resetAccount.getStatusCode())).body(resetAccount);
     }
-
-    public AccountResponse deleteUserAccount(String userId, String accountId) {
-        return null;
+    @DeleteMapping("/{userId}/delete/{accountId}")
+    public ResponseEntity<AccountResponse> deleteUserAccount(
+            @PathVariable String userId,
+            @PathVariable String accountId) {
+        AccountResponse deleted =service.deleteUserAccount(userId,accountId);
+        return ResponseEntity.status(HttpStatusCode.valueOf(deleted.getStatusCode())).body(deleted);
     }
 
     public AccountResponse getAccountById(String userId, String accountId) {
@@ -46,8 +50,23 @@ public class AccountController {
         var foundAccount =service.getUserAccount(userId, accountType);
         return ResponseEntity.status(HttpStatusCode.valueOf(foundAccount.getStatusCode())).body(foundAccount);
     }
+    @PatchMapping("/{userId}/update-balance/{accountId}")
+    public ResponseEntity<AccountResponse> updateAccountBalance(
+            @PathVariable String userId,
+            @PathVariable String accountId,
+            @RequestBody BalanceUpdate balanceUpdate) {
+        AccountResponse balResponse =service.updateAccountBalance(
+                userId,
+                accountId,
+                balanceUpdate);
+        return ResponseEntity.status(HttpStatusCode.valueOf(balResponse.getStatusCode())).body(balResponse);
+    }
+    @GetMapping("/{userId}")
+    public ResponseEntity<AccountResponse> getAllUserAccounts(@PathVariable String userId){
+        var foundAccount =service.getAllUserAccounts(userId);
+        return ResponseEntity
+                .status(HttpStatusCode.valueOf(foundAccount.getStatusCode()))
+                .body(foundAccount);
 
-    public AccountResponse updateAccountBalance(String userId, String accountId, BigInteger profitOrLoss) {
-        return null;
     }
 }
