@@ -29,7 +29,7 @@ public class UserServiceImpl implements UserServices {
     public UserResponse createNewUser(UserCreationRequest request) {
         UserResponse response =new UserResponse();
         Optional<User> existingUserWithEmailOrUsername =repository
-                .findUserByUsernameAndEmail(request.getUsername(), request.getEmail());
+                .findUserByUsernameOrEmail(request.getUsername(), request.getEmail());
         if(existingUserWithEmailOrUsername.isPresent()){
             response.setMessage("User with the email or username already exists. Log in to your account or change details");
             response.setStatusCode(409);

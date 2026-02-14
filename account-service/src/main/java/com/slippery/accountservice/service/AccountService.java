@@ -1,6 +1,7 @@
 package com.slippery.accountservice.service;
 
 import com.slippery.accountservice.dto.AccountResponse;
+import com.slippery.accountservice.dto.BalanceUpdate;
 import com.slippery.accountservice.models.AccountType;
 
 import java.math.BigInteger;
@@ -11,5 +12,6 @@ public interface AccountService {
     AccountResponse deleteUserAccount(String userId,String accountId);
     AccountResponse getAccountById(String userId,String accountId);
     AccountResponse getUserAccount(String userId,AccountType accountType);
-    AccountResponse updateAccountBalance(String userId, String accountId, BigInteger profitOrLoss);
+    AccountResponse getAllUserAccounts(String userId);
+    AccountResponse updateAccountBalance(String userId, String accountId, BalanceUpdate balanceUpdate);
 }
