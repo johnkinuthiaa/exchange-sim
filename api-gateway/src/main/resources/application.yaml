@@ -9,11 +9,16 @@ spring:
             - id: news-service
               uri: lb://NEWS-SERVICE
               predicates:
-                - Path=/api/v1/news/**,/api/v1/news
+                - Path=/api/v1/news,/api/v1/news/**
             - id: user-service
               uri: lb://USER-SERVICE
               predicates:
-                - PATH=/api/v1/users/**,/api/v1/users
+                - Path=/api/v1/users,/api/v1/users/**
+            - id: account-service
+              uri: lb://ACCOUNT-SERVICE
+              predicates:
+                - Path=/api/v1/accounts/**,/api/v1/accounts
+
 
 server:
   port: 8080

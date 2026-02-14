@@ -28,13 +28,10 @@ public class UserServiceImpl implements UserServices {
     @Override
     public UserResponse createNewUser(UserCreationRequest request) {
         UserResponse response =new UserResponse();
-        if(checkIfEmailExists(request.getEmail())){
-            response.setMessage("User with the email already exists");
-            response.setStatusCode(409);
-            return response;
-        }
-        if(checkIfUserNameExists(request.getUsername())){
-            response.setMessage("User with the username already exists");
+        Optional<User> existingUserWithEmailOrUsername =repository
+                .findUserByUsernameAndEmail(request.getUsername(), request.getEmail());
+        if(existingUserWithEmailOrUsername.isPresent()){
+            response.setMessage("User with the email or username already exists. Log in to your account or change details");
             response.setStatusCode(409);
             return response;
         }
@@ -120,14 +117,6 @@ public class UserServiceImpl implements UserServices {
         response.setStatusCode(200);
 
         return response;
-    }
-    private boolean checkIfUserNameExists(String username){
-        Optional<User> foundUser =repository.findUserByUsername(username);
-        return foundUser.isPresent();
-    }
-    private boolean checkIfEmailExists(String email){
-        Optional<User> foundUser =repository.findUserByEmail(email);
-        return foundUser.isPresent();
     }
 
 }
