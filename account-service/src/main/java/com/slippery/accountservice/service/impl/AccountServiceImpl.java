@@ -35,31 +35,18 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public AccountResponse createNewAccount(String userId, AccountType accountType) {
         AccountResponse response =new AccountResponse();
-        if(userId.isEmpty()){
-            response.setMessage("User id is mandatory to perform this action");
-            response.setStatusCode(404);
-            return response;
-        }
         boolean existingUser =UserExists(userId);
         if(!existingUser){
             response.setMessage("User not found");
             response.setStatusCode(404);
             return response;
         }
-        Optional<List<Account>> existingAccount =repository.getAccountByUserId(userId);
+        Optional<Account> existingAccount =repository.getAccountByUserIdAndAccountType(userId, accountType);
         if(existingAccount.isPresent()){
-            var userAccounts =existingAccount
-                    .get()
-                    .stream()
-                    .filter(accounts -> accounts.getAccountType().equals(accountType))
-                    .toList();
-            if(!userAccounts.isEmpty()){
-                response.setMessage("A "+accountType+" already exists for the user");
-                response.setStatusCode(409);
-                return response;
-            }
+            response.setMessage("A "+accountType+" already exists for the user");
+            response.setStatusCode(409);
+            return response;
         }
-
         Account account =new Account();
         account.setAccountType(accountType);
         account.setLastUpdated(new Date());
@@ -87,8 +74,31 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public AccountResponse resetDemoAccount(String userId, String accountId) {
-        AccountResponse accountResponse =new AccountResponse();
-        return null;
+        AccountResponse response =new AccountResponse();
+        boolean existingUser =UserExists(userId);
+        if(!existingUser){
+            response.setMessage("User not found");
+            response.setStatusCode(404);
+            return response;
+        }
+        Optional<Account> existingDemoAccount =repository.getAccountByAccountTypeAndId(AccountType.DEMO,accountId);
+        if(existingDemoAccount.isEmpty()){
+            response.setMessage("Invalid demo acc Id");
+            response.setStatusCode(404);
+            return response;
+        }
+        Account account =existingDemoAccount.get();
+        account.setBalance(BigInteger.valueOf(100_000));
+        account.setAvailableFunds(BigInteger.valueOf(100_000));
+        account.setEquity(BigInteger.valueOf(100_000));
+        account.setRealizedProfitsAndLosses(BigInteger.ZERO);
+        account.setUnrealizedProfitsAndLosses(BigInteger.ZERO);
+        account.setLastUpdated(new Date());
+        repository.save(account);
+        response.setMessage("Demo Account reset to default.");
+        response.setStatusCode(200);
+        response.setAccount(account);
+        return response;
     }
 
     @Override
@@ -110,22 +120,14 @@ public class AccountServiceImpl implements AccountService {
             response.setStatusCode(404);
             return response;
         }
-        Optional<List<Account>> userAccounts =repository.getAccountByUserId(userId);
-        if(userAccounts.isEmpty()){
-            response.setMessage("User does not have any accounts");
+        Optional<Account> userAccount =repository.getAccountByUserIdAndAccountType(userId,accountType);
+        if(userAccount.isEmpty()){
+            response.setMessage("User does not have any "+accountType+" accounts");
             response.setStatusCode(404);
             return response;
         }
-        List<Account> allAccounts =userAccounts.get();
-        var existingAccount =allAccounts.stream()
-                .filter(account -> account.getAccountType().equals(accountType))
-                .findFirst();
-        if(existingAccount.isEmpty()){
-            response.setMessage("User does not have a"+ accountType+" account");
-            response.setStatusCode(404);
-            return response;
-        }
-        response.setAccount(existingAccount.get());
+
+        response.setAccount(userAccount.get());
         response.setStatusCode(200);
         response.setMessage("User's "+accountType+" account found");
         return response;
@@ -136,15 +138,19 @@ public class AccountServiceImpl implements AccountService {
         return null;
     }
     private boolean UserExists(String userId){
-//        TODO: Replace all rest calls with rpc
-        ServiceInstance serviceInstance =discoveryClient.getInstances("user-service").get(0);
-        log.info("uri: {}",serviceInstance.getUri());
-        var existingUser =restClient.get()
-                .uri(serviceInstance.getUri()+"/api/v1/users/"+userId)
-                .retrieve()
-                .body(UserResponse.class);
-        assert existingUser != null;
-        return existingUser.getStatusCode() ==200;
+//        TODO: Replace all rest client call with rpc kesho..
+        try{
+            ServiceInstance serviceInstance =discoveryClient.getInstances("user-service").get(0);
+            log.info("uri: {}",serviceInstance.getUri());
+            var existingUser =restClient.get()
+                    .uri(serviceInstance.getUri()+"/api/v1/users/"+userId)
+                    .retrieve()
+                    .body(UserResponse.class);
+            assert existingUser != null;
+            return existingUser.getStatusCode() ==200;
+        }catch(Exception e){
+            return false;
+        }
 
     }
 }

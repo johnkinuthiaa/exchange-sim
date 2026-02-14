@@ -4,6 +4,8 @@ import com.slippery.accountservice.dto.AccountCreationRequest;
 import com.slippery.accountservice.dto.AccountResponse;
 import com.slippery.accountservice.models.AccountType;
 import com.slippery.accountservice.service.AccountService;
+import jakarta.validation.constraints.NotBlank;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,9 +25,12 @@ public class AccountController {
         var createdAccount =service.createNewAccount(request.getUserId(),request.getAccountType());
         return ResponseEntity.status(HttpStatusCode.valueOf(createdAccount.getStatusCode())).body(createdAccount);
     }
-
-    public AccountResponse resetDemoAccount(String userId, String accountId) {
-        return null;
+    @PatchMapping("/{userId}/reset/{accountId}")
+    public ResponseEntity<AccountResponse> resetDemoAccount(
+            @PathVariable String userId,
+            @PathVariable String accountId) {
+        AccountResponse resetAccount =service.resetDemoAccount(userId, accountId);
+        return ResponseEntity.status(HttpStatusCode.valueOf(resetAccount.getStatusCode())).body(resetAccount);
     }
 
     public AccountResponse deleteUserAccount(String userId, String accountId) {
@@ -36,7 +41,8 @@ public class AccountController {
         return null;
     }
     @GetMapping("/{userId}/get/{accountType}")
-    public ResponseEntity<AccountResponse> getUserAccount(@PathVariable String userId,@PathVariable AccountType accountType) {
+    public ResponseEntity<AccountResponse> getUserAccount(@PathVariable @NotBlank String userId,
+                                                          @PathVariable AccountType accountType) {
         var foundAccount =service.getUserAccount(userId, accountType);
         return ResponseEntity.status(HttpStatusCode.valueOf(foundAccount.getStatusCode())).body(foundAccount);
     }
